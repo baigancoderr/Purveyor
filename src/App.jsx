@@ -4,7 +4,6 @@ import Navbar  from './components/Navbar';
 import Footer  from './components/Footer';
 
 const HomePage   = lazy(() => import('./pages/HomePage'));
-const PresalePage = lazy(() => import('./pages/PresalePage'));
 
 const Loader = () => (
   <div className="min-h-screen bg-[#111111] flex items-center justify-center">
@@ -40,9 +39,14 @@ function App() {
               </MainLayout>
             }
           />
-
-          {/* Presale — full page, no shared nav/footer (has its own) */}
-          <Route path="/presale" element={<PresalePage />} />
+          <Route
+            path="/home"
+            element={
+              <MainLayout>
+                <HomePage />
+              </MainLayout>
+            }
+          />
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />

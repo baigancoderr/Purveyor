@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import whitepaper from '../assets/whitepaper.pdf';
 
 const FAQS = [
   {
@@ -33,7 +34,7 @@ const FAQS = [
   },
   {
     q: 'Where can I buy PVR?',
-    a: 'PVR can be acquired through the presale, and will be available on DEX platforms following the liquidity creation phase. Always verify the official contract address (0x594bf3E0d6e297f0178d5daa1700B39f3d54f2fB) before purchasing.',
+    a: 'Always verify the official contract address (0xB15a4FE7ebdbe9142129d5bBa9B0fF84A7B17c98) before purchasing.',
   },
 ];
 
@@ -139,7 +140,7 @@ const FAQ = () => {
         >
           <p className="text-gray-500 text-sm Gregular">
             Have more questions?{' '}
-            <a href="#" className="text-[#FFA200] hover:underline transition-colors">
+            <a href={whitepaper} target="_blank" rel="noopener noreferrer" className="text-[#FFA200] hover:underline transition-colors">
               Read the Whitepaper
             </a>{' '}
             for detailed information.

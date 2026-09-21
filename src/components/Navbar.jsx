@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import logo from '../assets/Logo Horizontal.png';
+import whitepaper from '../assets/whitepaper.pdf';
 
 const NAV_LINKS = [
   { label: 'Home',        href: '#hero' },
@@ -91,12 +92,12 @@ const Navbar = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.55, ease: [0.22, 1, 0.36, 1] }}
           >
-            <Link to="/presale">
+            <Link to="/home">
               <button className="nav-btn-gold px-6 py-2.5 text-sm">Buy Now</button>
             </Link>
-            <Link to="/presale">
+            <a href={whitepaper} target="_blank" rel="noopener noreferrer">
               <button className="nav-btn-gold px-6 py-2.5 text-sm">Whitepaper</button>
-            </Link>
+            </a>
           </motion.div>
 
           {/* Mobile hamburger */}

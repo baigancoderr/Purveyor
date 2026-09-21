@@ -3,7 +3,7 @@ import { Copy, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import bscscanLogo from '../assets/bscscan.png';
 
-const CONTRACT = '0x594bf3E0d6e297f0178d5daa1700B39f3d54f2fB';
+const CONTRACT = '0xB15a4FE7ebdbe9142129d5bBa9B0fF84A7B17c98';
 const BSCSCAN_URL = `https://bscscan.com/address/${CONTRACT}`;
 
 const staggerContainer = {

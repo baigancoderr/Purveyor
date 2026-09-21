@@ -2,8 +2,9 @@ import { Link } from 'react-router-dom';
 import { Facebook, Twitter, MessageCircle, ArrowUpRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import logo from '../assets/Logo Horizontal.png';
+import whitepaper from '../assets/whitepaper.pdf';
 
-const CONTRACT = '0x594bf3E0d6e297f0178d5daa1700B39f3d54f2fB';
+const CONTRACT = '0xB15a4FE7ebdbe9142129d5bBa9B0fF84A7B17c98';
 
 const socialLinks = [
   { label: 'Facebook', href: '#',                                        icon: Facebook    },
@@ -102,14 +103,9 @@ const Footer = () => {
               <h3 className="text-white Gsemibold text-base">Resources</h3>
               <ul className="flex flex-col items-center gap-2.5 lg:items-start">
                 <li>
-                  <a href="#" className="text-gray-400 hover:text-[#FFA200] transition-colors text-sm Gregular">
+                  <a href={whitepaper} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#FFA200] transition-colors text-sm Gregular">
                     Whitepaper
                   </a>
-                </li>
-                <li>
-                  <Link to="/presale" className="text-gray-400 hover:text-[#FFA200] transition-colors text-sm Gregular">
-                    Presale
-                  </Link>
                 </li>
                 <li>
                   <button onClick={() => scrollTo('#contract')} className="text-gray-400 hover:text-[#FFA200] transition-colors text-sm Gregular text-center">
@@ -194,8 +190,8 @@ const Footer = () => {
             <span className="mx-2 text-[#FFA200]/40">•</span>
             <span className="text-gray-600">Digital Finance</span>
           </span>
-          <a href="https://purveyorpvr.com" className="hover:text-[#FFA200] transition-colors">
-            purveyorpvr.com
+          <a href="https://purveyorpvr.io" className="hover:text-[#FFA200] transition-colors">
+            purveyorpvr.io
           </a>
         </motion.div>
       </div>

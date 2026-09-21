@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import Marquee from 'react-fast-marquee';
 import { motion } from 'framer-motion';
 import coinImg from '../assets/COIN.png';
+import whitepaper from '../assets/whitepaper.pdf';
 
 const HIGHLIGHTS = [
   { value: '1 Billion PVR', label: 'Total Supply' },
@@ -51,7 +52,7 @@ const Hero = () => (
 
     {/* ── Main content ── */}
     <div className="relative z-10 max-w-[1500px] mx-auto px-4 sm:px-5 lg:px-6 w-full">
-      <div className="flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-6 py-14 lg:py-16">
+      <div className="flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-6 py-8 lg:py-16">
 
         {/* Left — Text */}
         <motion.div
@@ -101,16 +102,16 @@ const Hero = () => (
             custom={3}
             className="flex flex-wrap gap-3 justify-center lg:justify-start"
           >
-            <Link to="/presale">
+            <Link to="/home">
               <button className="btn-gold px-8 py-3.5 text-sm">
                 Buy PVR Now
               </button>
             </Link>
-            <Link to="/presale">
+            <a href={whitepaper} target="_blank" rel="noopener noreferrer">
               <button className="btn-gold px-8 py-3.5 text-sm">
                 whitepaper
               </button>
-            </Link>
+            </a>
           </motion.div>
         </motion.div>
 

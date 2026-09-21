@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import whitepaper from '../assets/whitepaper.pdf';
 
 const STATS = [
   { value: '1B',   label: 'PVR Total Supply' },
@@ -67,19 +68,19 @@ const FinalCTA = () => (
         transition={{ duration: 0.55, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
       >
         <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
-          <Link to="/presale">
+          <Link to="/home">
             <button className="btn-gold px-10 py-2 text-base">Buy PVR</button>
           </Link>
         </motion.div>
         <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
-          <Link to="/presale">
+          <a href={whitepaper} target="_blank" rel="noopener noreferrer">
             <button className="btn-gold px-10 py-2 text-base">whitepaper</button>
-          </Link>
+          </a>
         </motion.div>
       </motion.div>
 
       {/* Stats strip with stagger */}
-      <motion.div
+      {/* <motion.div
         className="mt-14 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6"
         variants={staggerContainer}
         initial="hidden"
@@ -100,7 +101,7 @@ const FinalCTA = () => (
             <p className="text-gray-500 text-xs Gregular mt-1">{label}</p>
           </motion.div>
         ))}
-      </motion.div>
+      </motion.div> */}
     </div>
   </section>
 );
