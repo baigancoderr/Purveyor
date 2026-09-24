@@ -1,9 +1,10 @@
-import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { lazy, Suspense, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Navbar  from './components/Navbar';
 import Footer  from './components/Footer';
 
 const HomePage   = lazy(() => import('./pages/HomePage'));
+const PresalePage = lazy(() => import('./pages/Presalepage'));
 
 const Loader = () => (
   <div className="min-h-screen bg-[#111111] flex items-center justify-center">
@@ -13,6 +14,16 @@ const Loader = () => (
     </div>
   </div>
 );
+
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [pathname]);
+
+  return null;
+};
 
 /* Layout that wraps public landing pages with Navbar + Footer */
 const MainLayout = ({ children }) => (
@@ -28,6 +39,7 @@ const MainLayout = ({ children }) => (
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Suspense fallback={<Loader />}>
         <Routes>
           {/* Landing page */}
@@ -44,6 +56,14 @@ function App() {
             element={
               <MainLayout>
                 <HomePage />
+              </MainLayout>
+            }
+          />
+          <Route
+            path="/presale"
+            element={
+              <MainLayout>
+                <PresalePage />
               </MainLayout>
             }
           />

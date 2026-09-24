@@ -92,7 +92,7 @@ const Navbar = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.55, ease: [0.22, 1, 0.36, 1] }}
           >
-            <Link to="/home">
+            <Link to="/presale">
               <button className="nav-btn-gold px-6 py-2.5 text-sm">Buy Now</button>
             </Link>
             <a href={whitepaper} target="_blank" rel="noopener noreferrer">

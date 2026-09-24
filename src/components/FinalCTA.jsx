@@ -68,7 +68,7 @@ const FinalCTA = () => (
         transition={{ duration: 0.55, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
       >
         <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
-          <Link to="/home">
+          <Link to="/presale">
             <button className="btn-gold px-10 py-2 text-base">Buy PVR</button>
           </Link>
         </motion.div>

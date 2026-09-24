@@ -102,7 +102,7 @@ const Hero = () => (
             custom={3}
             className="flex flex-wrap gap-3 justify-center lg:justify-start"
           >
-            <Link to="/home">
+            <Link to="/presale">
               <button className="btn-gold px-8 py-3.5 text-sm">
                 Buy PVR Now
               </button>
