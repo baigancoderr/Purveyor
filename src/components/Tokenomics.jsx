@@ -7,7 +7,7 @@ const TOKEN_INFO = [
   { label: 'Symbol',          value: 'PVR' },
   { label: 'Network',         value: 'BNB Smart Chain' },
   { label: 'Total Supply',    value: '1,000,000,000 PVR' },
-  { label: 'Decimals',        value: '7' },
+  { label: 'Decimals',        value: '18' },
   { label: 'Reference Price', value: '$0.05' },
   { label: 'Sector',          value: 'Fintech + RWA' },
 ];

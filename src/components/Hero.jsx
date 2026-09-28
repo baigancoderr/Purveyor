@@ -8,7 +8,7 @@ const HIGHLIGHTS = [
   { value: '1 Billion PVR', label: 'Total Supply' },
   { value: 'BNB Smart Chain', label: 'Blockchain Network' },
   { value: 'Fintech + RWA', label: 'Core Focus' },
-  { value: '7 Decimals', label: 'Token Precision' },
+  { value: '18 Decimals', label: 'Token Precision' },
 ];
 
 const MARQUEE_ITEMS = [

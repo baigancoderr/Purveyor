@@ -3,8 +3,9 @@ import { Facebook, Twitter, MessageCircle, ArrowUpRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import logo from '../assets/Logo Horizontal.png';
 import whitepaper from '../assets/whitepaper.pdf';
+import { PVR_TOKEN_ADDRESS } from '../config/contracts';
 
-const CONTRACT = '0xB15a4FE7ebdbe9142129d5bBa9B0fF84A7B17c98';
+const CONTRACT = PVR_TOKEN_ADDRESS;
 
 const socialLinks = [
   { label: 'Facebook', href: '#',                                        icon: Facebook    },
@@ -190,8 +191,8 @@ const Footer = () => {
             <span className="mx-2 text-[#FFA200]/40">•</span>
             <span className="text-gray-600">Digital Finance</span>
           </span>
-          <a href="https://purveyorpvr.io" className="hover:text-[#FFA200] transition-colors">
-            purveyorpvr.io
+          <a href="https://purveyorpvr.com" className="hover:text-[#FFA200] transition-colors">
+            purveyorpvr.com
           </a>
         </motion.div>
       </div>

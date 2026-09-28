@@ -18,17 +18,22 @@ import {
   X,
 } from 'lucide-react';
 import { ethers } from 'ethers';
+import {
+  useAppKit,
+  useAppKitAccount,
+  useAppKitProvider,
+} from '@reown/appkit/react';
 
 import logo from '../assets/Logo Horizontal.png';
+import { PRESALE_CONTRACT_ADDRESS } from '../config/contracts';
 
-const PRESALE_CONTRACT = '0x42948917ceDA709c2724E570AC4dd09370b2f308';
+const PRESALE_CONTRACT = PRESALE_CONTRACT_ADDRESS;
 
 const BSCSCAN = `https://bscscan.com/address/${PRESALE_CONTRACT}`;
 
 const CHAIN_ID = '0x38';
 const CHAIN_ID_NUMBER = 56n;
-
-const PVR_DECIMALS = 7;
+const BSC_RPC_URL = 'https://bsc-dataseed.bnbchain.org';
 
 const PRESALE_ABI = [
   'function buyWithUSDT(uint256 usdtAmount) external returns (uint256)',
@@ -36,8 +41,9 @@ const PRESALE_ABI = [
   'function pvrPrice() view returns (uint256)',
   'function pvrToken() view returns (address)',
   'function usdtToken() view returns (address)',
+  'function usdtBalance() view returns (uint256)',
   'function presaleActive() view returns (bool)',
-  'function remainingPVR() view returns (uint256)',
+  'function remainingPvr() view returns (uint256)',
   'function totalPvrSold() view returns (uint256)',
   'function purchasedPvr(address buyer) view returns (uint256)',
   'function maxPurchasePerWallet() view returns (uint256)',
@@ -150,6 +156,10 @@ const PRESALE_BENEFITS = [
 ];
 
 const PresalePage = () => {
+  const { open } = useAppKit();
+  const { address: connectedAddress, isConnected } = useAppKitAccount();
+  const { walletProvider } = useAppKitProvider('eip155');
+
   const [provider, setProvider] = useState(null);
   const [signer, setSigner] = useState(null);
 
@@ -158,6 +168,7 @@ const PresalePage = () => {
 
   const [usdtBalance, setUsdtBalance] = useState('0');
   const [usdtDecimals, setUsdtDecimals] = useState(18);
+  const [pvrDecimals, setPvrDecimals] = useState(7);
   const [pvrBalance, setPvrBalance] = useState('0');
 
   const [pvrPrice, setPvrPrice] = useState(0);
@@ -186,22 +197,25 @@ const PresalePage = () => {
 
   /*
    * ---------------------------------------------------------
-  * Switch MetaMask to BSC Mainnet
+  * Switch connected wallet to BSC Mainnet
    * ---------------------------------------------------------
    */
-  const switchToBSC = async () => {
-    if (!window.ethereum) {
-      throw new Error('MetaMask is not installed.');
+  const switchToBSC = async (activeWalletProvider) => {
+    if (!activeWalletProvider?.request) {
+      throw new Error('Wallet provider is unavailable.');
     }
 
     try {
-      await window.ethereum.request({
+      await activeWalletProvider.request({
         method: 'wallet_switchEthereumChain',
         params: [{ chainId: CHAIN_ID }],
       });
     } catch (error) {
-      if (error.code === 4902) {
-        await window.ethereum.request({
+      if (error.code !== 4902) {
+        throw error;
+      }
+
+      await activeWalletProvider.request({
           method: 'wallet_addEthereumChain',
           params: [
             {
@@ -220,10 +234,12 @@ const PresalePage = () => {
               ],
             },
           ],
-        });
-      } else {
-        throw error;
-      }
+      });
+
+      await activeWalletProvider.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: CHAIN_ID }],
+      });
     }
   };
 
@@ -238,44 +254,12 @@ const PresalePage = () => {
       setMessage('');
       setMessageType('');
 
-      if (!window.ethereum) {
-        setMessage('MetaMask is not installed.');
-        setMessageType('error');
-        return;
-      }
-
-      await switchToBSC();
-
-      const browserProvider = new ethers.BrowserProvider(
-        window.ethereum
-      );
-
-      const accounts = await browserProvider.send(
-        'eth_requestAccounts',
-        []
-      );
-
-      if (!accounts.length) {
-        throw new Error('No wallet account found.');
-      }
-
-      const walletSigner = await browserProvider.getSigner();
-
-      const address = await walletSigner.getAddress();
-
-      setProvider(browserProvider);
-      setSigner(walletSigner);
-      setWalletAddress(address);
-      setWalletConnected(true);
-
-      setMessage('Wallet connected successfully.');
-      setMessageType('success');
+      await open();
     } catch (error) {
       console.error(error);
 
       setMessage(getErrorMessage(error));
       setMessageType('error');
-      setWalletConnected(false);
     } finally {
       setLoadingWallet(false);
     }
@@ -289,11 +273,9 @@ const PresalePage = () => {
   const loadData = useCallback(
     async (currentProvider = provider, currentAddress = walletAddress) => {
       try {
-        if (!window.ethereum) return;
-
         const activeProvider =
           currentProvider ||
-          new ethers.BrowserProvider(window.ethereum);
+          new ethers.JsonRpcProvider(BSC_RPC_URL);
 
         const presale = new ethers.Contract(
           PRESALE_CONTRACT,
@@ -311,7 +293,7 @@ const PresalePage = () => {
           pvrAddress,
         ] = await Promise.all([
           presale.pvrPrice(),
-          presale.remainingPVR(),
+          presale.remainingPvr(),
           presale.totalPvrSold(),
           presale.presaleActive(),
           presale.maxPurchasePerWallet(),
@@ -325,22 +307,28 @@ const PresalePage = () => {
           activeProvider
         );
 
-        const [contractUsdtBalance, tokenDecimals] =
+        const [contractUsdtBalance, tokenDecimals, pvrTokenDecimals] =
           await Promise.all([
-            usdt.balanceOf(PRESALE_CONTRACT),
+            presale.usdtBalance(),
             usdt.decimals(),
+            new ethers.Contract(
+              pvrAddress,
+              TOKEN_ABI,
+              activeProvider
+            ).decimals(),
           ]);
 
         setUsdtDecimals(Number(tokenDecimals));
+        setPvrDecimals(Number(pvrTokenDecimals));
 
         setPvrPrice(Number(ethers.formatUnits(priceRaw, 18)));
 
         setRemainingTokens(
-          ethers.formatUnits(remainingRaw, PVR_DECIMALS)
+          ethers.formatUnits(remainingRaw, Number(pvrTokenDecimals))
         );
 
         setTotalSold(
-          ethers.formatUnits(soldRaw, PVR_DECIMALS)
+          ethers.formatUnits(soldRaw, Number(pvrTokenDecimals))
         );
 
         setTotalRaised(
@@ -353,12 +341,12 @@ const PresalePage = () => {
         setAllocation(
           ethers.formatUnits(
             remainingRaw + soldRaw,
-            PVR_DECIMALS
+            Number(pvrTokenDecimals)
           )
         );
 
         setMaxPurchase(
-          ethers.formatUnits(maxPurchaseRaw, PVR_DECIMALS)
+          ethers.formatUnits(maxPurchaseRaw, Number(pvrTokenDecimals))
         );
         setSaleActive(active);
 
@@ -380,11 +368,11 @@ const PresalePage = () => {
           );
 
           setPvrBalance(
-            ethers.formatUnits(pvrBal, PVR_DECIMALS)
+            ethers.formatUnits(pvrBal, Number(pvrTokenDecimals))
           );
 
           setUserPurchased(
-            ethers.formatUnits(purchased, PVR_DECIMALS)
+            ethers.formatUnits(purchased, Number(pvrTokenDecimals))
           );
         }
       } catch (error) {
@@ -405,88 +393,61 @@ const PresalePage = () => {
 
   /*
    * ---------------------------------------------------------
-   * Auto reconnect existing wallet
+   * Sync Reown wallet connection
    * ---------------------------------------------------------
    */
   useEffect(() => {
-    const checkWallet = async () => {
-      try {
-        if (!window.ethereum) return;
+    let cancelled = false;
 
-        const browserProvider = new ethers.BrowserProvider(
-          window.ethereum
-        );
-
-        const accounts = await browserProvider.listAccounts();
-
-        if (!accounts.length) return;
-
-        const network = await browserProvider.getNetwork();
-
-        if (network.chainId !== CHAIN_ID_NUMBER) return;
-
-        const walletSigner = await browserProvider.getSigner();
-
-        const address = await walletSigner.getAddress();
-
-        setProvider(browserProvider);
-        setSigner(walletSigner);
-        setWalletAddress(address);
-        setWalletConnected(true);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    checkWallet();
-  }, []);
-
-  /*
-   * ---------------------------------------------------------
-   * MetaMask account/network changes
-   * ---------------------------------------------------------
-   */
-  useEffect(() => {
-    if (!window.ethereum) return;
-
-    const handleAccountsChanged = (accounts) => {
-      if (!accounts.length) {
+    const syncWallet = async () => {
+      if (!isConnected || !connectedAddress || !walletProvider) {
+        setProvider(null);
+        setSigner(null);
         setWalletAddress('');
         setWalletConnected(false);
-        setSigner(null);
+        setUsdtBalance('0');
+        setPvrBalance('0');
+        setUserPurchased('0');
         return;
       }
 
-      setWalletAddress(accounts[0]);
-      setWalletConnected(true);
+      try {
+        const initialProvider = new ethers.BrowserProvider(walletProvider);
+        const network = await initialProvider.getNetwork();
+
+        if (network.chainId !== CHAIN_ID_NUMBER) {
+          await switchToBSC(walletProvider);
+        }
+
+        const browserProvider = new ethers.BrowserProvider(walletProvider);
+        const walletSigner = await browserProvider.getSigner(connectedAddress);
+
+        if (cancelled) return;
+
+        setProvider(browserProvider);
+        setSigner(walletSigner);
+        setWalletAddress(connectedAddress);
+        setWalletConnected(true);
+        setMessage('Wallet connected successfully.');
+        setMessageType('success');
+      } catch (error) {
+        console.error(error);
+        if (cancelled) return;
+
+        setProvider(null);
+        setSigner(null);
+        setWalletAddress(connectedAddress);
+        setWalletConnected(false);
+        setMessage('Please switch your wallet to BNB Smart Chain.');
+        setMessageType('error');
+      }
     };
 
-    const handleChainChanged = () => {
-      window.location.reload();
-    };
-
-    window.ethereum.on(
-      'accountsChanged',
-      handleAccountsChanged
-    );
-
-    window.ethereum.on(
-      'chainChanged',
-      handleChainChanged
-    );
-
+    syncWallet();
     return () => {
-      window.ethereum.removeListener(
-        'accountsChanged',
-        handleAccountsChanged
-      );
-
-      window.ethereum.removeListener(
-        'chainChanged',
-        handleChainChanged
-      );
+      cancelled = true;
     };
-  }, []);
+  }, [connectedAddress, isConnected, walletProvider]);
 
   /*
    * ---------------------------------------------------------
@@ -504,15 +465,7 @@ const PresalePage = () => {
         const amount = ethers.parseUnits(usdtAmt, usdtDecimals);
 
         const browserProvider =
-          provider ||
-          (window.ethereum
-            ? new ethers.BrowserProvider(window.ethereum)
-            : null);
-
-        if (!browserProvider) {
-          setEstimatedPVR('0');
-          return;
-        }
+          provider || new ethers.JsonRpcProvider(BSC_RPC_URL);
 
         const presale = new ethers.Contract(
           PRESALE_CONTRACT,
@@ -523,7 +476,7 @@ const PresalePage = () => {
         const tokenAmount = await presale.getPvrAmount(amount);
 
         setEstimatedPVR(
-          ethers.formatUnits(tokenAmount, PVR_DECIMALS)
+          ethers.formatUnits(tokenAmount, pvrDecimals)
         );
       } catch (error) {
         console.error('Estimate error:', error);
@@ -532,7 +485,7 @@ const PresalePage = () => {
     };
 
     calculateEstimate();
-  }, [usdtAmt, usdtDecimals, provider]);
+  }, [usdtAmt, usdtDecimals, pvrDecimals, provider]);
 
   /*
    * ---------------------------------------------------------
@@ -594,6 +547,14 @@ const PresalePage = () => {
 
       if (!saleActive) {
         setMessage('Presale is not active right now.');
+        setMessageType('error');
+        return;
+      }
+
+      if (pvrDecimals !== 18) {
+        setMessage(
+          'PVR token decimals do not match the presale contract. Purchases are disabled.'
+        );
         setMessageType('error');
         return;
       }
@@ -784,12 +745,10 @@ const PresalePage = () => {
               </span>
             </h1>
 
-            <p className="text-gray-300 text-base sm:text-lg Gregular max-w-2xl mx-auto leading-relaxed">
+            <p className="text-gray-300 text-base sm:text-lg Gregular max-w-5xl mx-auto leading-relaxed">
               Become an early participant in the Purveyor ecosystem
               and gain access to PVR during the token presale.
-              PVR is designed around a long-term vision combining
-              Fintech, Real-World Assets, blockchain infrastructure,
-              and ecosystem utility.
+              
             </p>
 
           </div>

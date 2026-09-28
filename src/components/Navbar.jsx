@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import logo from '../assets/Logo Horizontal.png';
 import whitepaper from '../assets/whitepaper.pdf';
@@ -17,6 +17,8 @@ const NAV_LINKS = [
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -26,8 +28,23 @@ const Navbar = () => {
 
   const handleNav = (href) => {
     setMenuOpen(false);
+
+    if (pathname !== '/') {
+      navigate(`/${href}`);
+      return;
+    }
+
     const el = document.querySelector(href);
     if (el) el.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleMobileNav = (event, href) => {
+    setMenuOpen(false);
+
+    if (pathname !== '/') {
+      event.preventDefault();
+      navigate(`/${href}`);
+    }
   };
 
   return (
@@ -136,17 +153,18 @@ const Navbar = () => {
               }}
             >
               {NAV_LINKS.map((link) => (
-                <motion.button
+                <motion.a
                   key={link.label}
+                  href={link.href}
                   variants={{
                     hidden: { opacity: 0, x: -16 },
                     show: { opacity: 1, x: 0, transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] } },
                   }}
-                  onClick={() => handleNav(link.href)}
+                  onClick={(event) => handleMobileNav(event, link.href)}
                   className="text-center px-3 py-3 text-gray-300 hover:text-[#FFA200] hover:bg-[#FFA200]/5 rounded-lg transition-colors text-sm border-b border-gray-800/50 w-full"
                 >
                   {link.label}
-                </motion.button>
+                </motion.a>
               ))}
 
 

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import whitepaper from '../assets/whitepaper.pdf';
+import { PVR_TOKEN_ADDRESS } from '../config/contracts';
 
 const FAQS = [
   {
@@ -34,7 +35,7 @@ const FAQS = [
   },
   {
     q: 'Where can I buy PVR?',
-    a: 'Always verify the official contract address (0xB15a4FE7ebdbe9142129d5bBa9B0fF84A7B17c98) before purchasing.',
+    a: `Always verify the official contract address (${PVR_TOKEN_ADDRESS}) before purchasing.`,
   },
 ];
 
