@@ -6,7 +6,7 @@ const STATS = [
   { value: '1B',   label: 'PVR Total Supply' },
   { value: '$0.05',label: 'Listing Price' },
   { value: 'BSC',  label: 'Blockchain' },
-  { value: '7',    label: 'Token Decimals' },
+  { value: '18',    label: 'Token Decimals' },
 ];
 
 const staggerContainer = {

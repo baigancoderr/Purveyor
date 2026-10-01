@@ -27,7 +27,7 @@ const FAQS = [
   },
   {
     q: 'How many decimals does PVR have?',
-    a: 'PVR has 7 decimals, which allows for precise fractional token amounts in transactions and ecosystem interactions.',
+    a: 'PVR has 18 decimals, which allows for precise fractional token amounts in transactions and ecosystem interactions.',
   },
   {
     q: 'What is the reference listing price for PVR?',

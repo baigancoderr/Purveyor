@@ -41,10 +41,7 @@ const PRESALE_ABI = [
   'function pvrPrice() view returns (uint256)',
   'function pvrToken() view returns (address)',
   'function usdtToken() view returns (address)',
-  'function usdtBalance() view returns (uint256)',
   'function presaleActive() view returns (bool)',
-  'function remainingPvr() view returns (uint256)',
-  'function totalPvrSold() view returns (uint256)',
   'function purchasedPvr(address buyer) view returns (uint256)',
   'function maxPurchasePerWallet() view returns (uint256)',
 ];
@@ -173,11 +170,6 @@ const PresalePage = () => {
 
   const [pvrPrice, setPvrPrice] = useState(0);
 
-  const [remainingTokens, setRemainingTokens] = useState('0');
-  const [totalSold, setTotalSold] = useState('0');
-  const [totalRaised, setTotalRaised] = useState('0');
-  const [allocation, setAllocation] = useState('100000000');
-
   const [maxPurchase, setMaxPurchase] = useState('0');
   const [saleActive, setSaleActive] = useState(false);
 
@@ -285,16 +277,12 @@ const PresalePage = () => {
 
         const [
           priceRaw,
-          remainingRaw,
-          soldRaw,
           active,
           maxPurchaseRaw,
           usdtAddress,
           pvrAddress,
         ] = await Promise.all([
           presale.pvrPrice(),
-          presale.remainingPvr(),
-          presale.totalPvrSold(),
           presale.presaleActive(),
           presale.maxPurchasePerWallet(),
           presale.usdtToken(),
@@ -307,43 +295,19 @@ const PresalePage = () => {
           activeProvider
         );
 
-        const [contractUsdtBalance, tokenDecimals, pvrTokenDecimals] =
-          await Promise.all([
-            presale.usdtBalance(),
-            usdt.decimals(),
-            new ethers.Contract(
-              pvrAddress,
-              TOKEN_ABI,
-              activeProvider
-            ).decimals(),
-          ]);
+        const [tokenDecimals, pvrTokenDecimals] = await Promise.all([
+          usdt.decimals(),
+          new ethers.Contract(
+            pvrAddress,
+            TOKEN_ABI,
+            activeProvider
+          ).decimals(),
+        ]);
 
         setUsdtDecimals(Number(tokenDecimals));
         setPvrDecimals(Number(pvrTokenDecimals));
 
         setPvrPrice(Number(ethers.formatUnits(priceRaw, 18)));
-
-        setRemainingTokens(
-          ethers.formatUnits(remainingRaw, Number(pvrTokenDecimals))
-        );
-
-        setTotalSold(
-          ethers.formatUnits(soldRaw, Number(pvrTokenDecimals))
-        );
-
-        setTotalRaised(
-          ethers.formatUnits(
-            contractUsdtBalance,
-            Number(tokenDecimals)
-          )
-        );
-
-        setAllocation(
-          ethers.formatUnits(
-            remainingRaw + soldRaw,
-            Number(pvrTokenDecimals)
-          )
-        );
 
         setMaxPurchase(
           ethers.formatUnits(maxPurchaseRaw, Number(pvrTokenDecimals))
@@ -624,14 +588,6 @@ const PresalePage = () => {
     }
   };
 
-  const progress =
-    Number(allocation) > 0
-      ? Math.min(
-          100,
-          (Number(totalSold) / Number(allocation)) * 100
-        )
-      : 0;
-
   const shortWallet = walletAddress
     ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
     : '';
@@ -778,48 +734,8 @@ const PresalePage = () => {
 
               </div>
 
-              {/* Progress */}
-              <div className="rounded-2xl border border-[#FFA200]/20 bg-[#1E1E1E] p-6">
-
-                <div className="flex items-center justify-between mb-3">
-
-                  <span className="text-white Gsemibold text-sm">
-                    Presale Progress
-                  </span>
-
-                  <span className="text-[#FFA200] text-sm Gsemibold">
-                    {progress.toFixed(2)}%
-                  </span>
-
-                </div>
-
-                <div className="w-full h-3 bg-[#2E2921] rounded-full overflow-hidden mb-3">
-
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-[#FFA200] to-[#FFD996] transition-all duration-1000"
-                    style={{
-                      width: `${progress}%`,
-                    }}
-                  />
-
-                </div>
-
-                <div className="flex items-center justify-between text-xs text-gray-500 Gregular">
-
-                  <span>
-                    {formatCompact(totalSold)} PVR Sold
-                  </span>
-
-                  <span>
-                    Target: {formatCompact(allocation)} PVR
-                  </span>
-
-                </div>
-
-              </div>
-
               {/* Stats */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
 
                 <div className="rounded-2xl border border-gray-800/60 bg-[#1E1E1E] p-5">
 
@@ -829,30 +745,6 @@ const PresalePage = () => {
 
                   <p className="text-[#FFA200] Gbold text-xl mt-2">
                     ${formatNumber(pvrPrice, 4)}
-                  </p>
-
-                </div>
-
-                <div className="rounded-2xl border border-gray-800/60 bg-[#1E1E1E] p-5">
-
-                  <p className="text-gray-500 text-xs uppercase tracking-wider">
-                    Raised
-                  </p>
-
-                  <p className="text-white Gbold text-xl mt-2">
-                    {formatNumber(totalRaised, 2)} USDT
-                  </p>
-
-                </div>
-
-                <div className="col-span-2 rounded-2xl border border-gray-800/60 bg-[#1E1E1E] p-5">
-
-                  <p className="text-gray-500 text-xs uppercase tracking-wider">
-                    Remaining
-                  </p>
-
-                  <p className="text-white Gbold text-xl mt-2">
-                    {formatCompact(remainingTokens)} PVR
                   </p>
 
                 </div>
@@ -962,9 +854,9 @@ const PresalePage = () => {
                     Buy PVR
                   </h2>
 
-                  <p className="text-gray-500 text-center text-xs mt-1">
+                  {/* <p className="text-gray-500 text-center text-xs mt-1">
                     BNB Smart Chain Mainnet
-                  </p>
+                  </p> */}
 
                 </div>
 
@@ -1206,13 +1098,13 @@ const PresalePage = () => {
 
                   </button>
 
-                  <p className="text-center text-gray-600 text-[11px]">
+                  {/* <p className="text-center text-gray-600 text-[11px]">
                     Transactions are executed directly through the
                     PVR presale smart contract.
-                  </p>
+                  </p> */}
 
                   {/* Disclaimer */}
-                  <div className="flex gap-2 p-3 bg-[#FFA200]/5 border border-[#FFA200]/15 rounded-xl">
+                  {/* <div className="flex gap-2 p-3 bg-[#FFA200]/5 border border-[#FFA200]/15 rounded-xl">
 
                     <Info
                       size={14}
@@ -1226,7 +1118,7 @@ const PresalePage = () => {
                       address before interacting with a smart contract.
                     </p>
 
-                  </div>
+                  </div> */}
 
                 </div>
               </div>
